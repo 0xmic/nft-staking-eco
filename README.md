@@ -1,66 +1,23 @@
-## Foundry
+# NFT Staking Ecosystem
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contract trio: NFT with merkle tree discount, ERC20 token, staking contract  
 
-Foundry consists of:
+[X] Create an ERC721 NFT with a **supply of 20**.  
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+[X] Include **ERC 2918 royalty** in your contract to have a **reward rate of 2.5%** for any NFT in the collection. Use the openzeppelin implementation.  
 
-## Documentation
+[X] Addresses in a merkle tree **can mint NFTs at a discount**. Use the **bitmap methodology** described above. Use openzeppelin’s bitmap, don’t implement it yourself.  
 
-https://book.getfoundry.sh/
+[X] Create an **ERC20 contract that will be used to reward staking**.  
 
-## Usage
+[X] Create and a **third smart contract** that can **mint new ERC20 tokens and receive ERC721 tokens**. A classic feature of NFTs is being able to receive them to stake tokens. **Users can send their NFTs and withdraw 10 ERC20 tokens every 24 hours**. Don’t forget about decimal places! The user can withdraw the NFT at any time. The smart contract must take possession of the NFT and only the user should be able to withdraw it. IMPORTANT: your staking mechanism must follow the sequence in the video I recorded above (stake NFTs with safetransfer).  
 
-### Build
+[X] Make the **funds from the NFT sale** in the contract **withdrawable by the owner**. Use Ownable2Step.  
 
-```shell
-$ forge build
-```
+[ ] Important: Use a combination of unit tests and the gas profiler in foundry or hardhat to measure the gas cost of the various operations.  
 
-### Test
+## Discounted Minting
 
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Requirements:  
+* **Whitelisted Ethereum Address**: You must have your Ethereum address that was included in the whitelist - this is defined by the merkleRoot set on contract creation.  
+* **Merkle Proof Data**: The project/contract deployer will provide users with Merkle proofs for their associated whitelisted address. This is a series of hash values that prove your address is included in the Merkle Tree.  
