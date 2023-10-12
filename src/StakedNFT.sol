@@ -10,6 +10,11 @@ import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step
 import {ERC721Royalty} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+// import {ERC721} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/token/ERC721/ERC721.sol";
+// import {Ownable, Ownable2Step} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/Ownable2Step.sol";
+// import {ERC721Royalty} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/token/ERC721/extensions/ERC721Royalty.sol";
+// import {BitMaps} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/utils/structs/BitMaps.sol";
+// import {MerkleProof} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
  * @title StakedNFT
@@ -30,9 +35,9 @@ contract StakedNFT is ERC721Royalty, Ownable2Step {
     bytes32 public merkleRoot;
 
     // Events
-    event NFTMinted(address indexed recipient, uint256 indexed tokenId);
-    event FundsWithdrawn(address indexed owner, uint256 amount);
     event DiscountClaimed(address indexed recipient, uint256 indexed tokenId, uint256 indexed index);
+    event FundsWithdrawn(address indexed owner, uint256 amount);
+    event NFTMinted(address indexed recipient, uint256 indexed tokenId);
 
     /**
      * @dev Contract initializer. Initializes the ERC721 and Ownable2Step contracts.
@@ -44,7 +49,7 @@ contract StakedNFT is ERC721Royalty, Ownable2Step {
     {
         ROYALTY_RECEIVER = initialOwner;
         ROYALTY_FEE = 250; // 2.5%
-        merkleRoot = _merkleRoot; // Discounted addresses
+        merkleRoot = _merkleRoot; // Discount list including address/index/amount
 
         _setDefaultRoyalty(ROYALTY_RECEIVER, ROYALTY_FEE);
     }
@@ -53,20 +58,26 @@ contract StakedNFT is ERC721Royalty, Ownable2Step {
      * @dev Allows eligible addresses to mint an NFT at a discount.
      * The address must be included in the Merkle root and not have claimed the discount before.
      * @param merkleProof The Merkle proof to verify the caller's eligibility for the discount.
+     * @param index The index of the address in the Merkle tree.
      */
-    function claimDiscount(bytes32[] calldata merkleProof) external payable {
-        bytes32 node = keccak256(abi.encodePacked(msg.sender));
+    function claimDiscount(bytes32[] calldata merkleProof, uint256 index) external payable {
+        // Ensure the discount hasn't already been claimed
+        require(!discountBitMap.get(index), "Already claimed");
 
-        // Verify if the sender is eligible for the discount
-        require(MerkleProof.verify(merkleProof, merkleRoot, node), "Invalid Merkle proof");
-        uint256 index = uint256(node) % 256;
-        require(!discountBitMap.get(index), "Discount already claimed");
-        require(msg.value == DISCOUNT_PRICE, "Ether value sent is not correct");
+        // Verify the Merkle proof
+        bytes32 node = keccak256(abi.encodePacked(msg.sender, index));
+        bytes32 leaf = keccak256(bytes.concat(node));
+        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
 
-        // Update the bitmap to indicate that the discount has been claimed
+        // Mark the discount as claimed in the BitMap
         discountBitMap.setTo(index, true);
 
+        // Ensure the correct amount of Ether was sent
+        require(msg.value == DISCOUNT_PRICE, "Incorrect Ether value sent");
+
+        // Mint the NFT to the sender
         _mint(msg.sender, s_tokenCounter);
+
         emit DiscountClaimed(msg.sender, s_tokenCounter, index);
         s_tokenCounter++;
     }
