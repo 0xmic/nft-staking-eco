@@ -8,7 +8,7 @@ import {NFTRewardStaking} from "../src/NFTRewardStaking.sol";
 import {StakedNFT} from "../src/StakedNFT.sol";
 import {DeployStakedNFT} from "../script/DeployStakedNFT.s.sol";
 
-contract BondingCurveTokenTest is StdCheats, Test {
+contract StakedNFTTest is StdCheats, Test {
     ERC20Reward public erc20Reward;
     StakedNFT public stakedNFT;
     NFTRewardStaking public nftRewardStaking;

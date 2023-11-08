@@ -19,7 +19,7 @@ contract DeployStakedNFT is Script {
         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
     uint256 public deployerKey;
     address public deployerAddress;
-    bytes32 public merkleProof;
+    bytes32 public merkleProof = "";
     ContractList public contractList;
     
 

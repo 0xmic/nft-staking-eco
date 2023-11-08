@@ -55,8 +55,11 @@ contract NFTRewardStaking is IERC721Receiver, Ownable2Step {
         uint256 tokenId,
         bytes calldata data
     ) public override returns (bytes4) {
+        require(msg.sender == address(stakedNFT), "Only stakedNFT can call this function");
+
         originalOwner[tokenId] = from;
         lastClaimed[tokenId] = block.timestamp;
+
         emit NFTStaked(from, tokenId);
         return this.onERC721Received.selector;
     }
@@ -87,8 +90,8 @@ contract NFTRewardStaking is IERC721Receiver, Ownable2Step {
     function withdrawNFT(uint256 tokenId) public {
         require(originalOwner[tokenId] == msg.sender, "Not the original owner");
 
-        stakedNFT.safeTransferFrom(address(this), msg.sender, tokenId);
         delete originalOwner[tokenId];
+        stakedNFT.safeTransferFrom(address(this), msg.sender, tokenId);
 
         emit NFTWithdrawn(msg.sender, tokenId);
     }

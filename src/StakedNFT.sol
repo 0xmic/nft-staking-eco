@@ -118,6 +118,8 @@ contract StakedNFT is ERC721Royalty, Ownable2Step {
      */
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
+        
+        // can use msg.sender instead of owner()
         (bool sent, ) = payable(owner()).call{value: balance}("");
         require(sent, "Failed to send Ether");
 
