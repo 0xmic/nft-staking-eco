@@ -15,6 +15,7 @@ contract StakedNFTTest is StdCheats, Test {
     DeployStakedNFT public deployer;
 
     address public deployerAddress;
+    address public testUser;
 
     function setUp() public {
         deployer = new DeployStakedNFT();
@@ -22,34 +23,95 @@ contract StakedNFTTest is StdCheats, Test {
         stakedNFT = contracts.stakedNFT;
         erc20Reward = contracts.rewardToken;
         nftRewardStaking = contracts.nftRewardStaking;
+
         deployerAddress = deployer.deployerAddress();
+        testUser = address(0x123);
     }
+
+    /////////////////////////////////////////////////////////
+    // ERC20Reward.sol 
 
     function test_TokenName() public {
         assertEq(erc20Reward.name(), "RewardToken");
     }
 
+    /////////////////////////////////////////////////////////
+    // StakedNFT.sol 
+
     function test_ERC721CreationAndProperties() public {
-        // TODO: Implement the test
+        assertEq(stakedNFT.name(), "StakedNFT");
+        assertEq(stakedNFT.symbol(), "STKNFT");
+        assertEq(stakedNFT.MAX_SUPPLY(), 20);
+        assertEq(stakedNFT.PRICE(), 1 ether);
+    }
+
+    function test_mintNFT() public {
+        hoax(testUser, 1 ether);
+        stakedNFT.mint{value: 1 ether}();
+        
+        assertEq(stakedNFT.balanceOf(testUser), 1);
+        assertEq(stakedNFT.viewBalance(), 1 ether);
+    }
+
+    function test_setRoyalty() public {
+        vm.startPrank(deployerAddress);
+        stakedNFT.setRoyalty(deployerAddress, 100); // lower fee from 2.5% to 1%
+        vm.stopPrank();
+
+        assertEq(stakedNFT.ROYALTY_RECEIVER(), deployerAddress);
+        assertEq(stakedNFT.ROYALTY_FEE(), 100);
+    }
+
+    function test_withdraw() public {
+        hoax(testUser, 1 ether);
+        stakedNFT.mint{value: 1 ether}();
+
+        vm.prank(deployerAddress);
+        stakedNFT.withdraw();
+
+        assertEq(stakedNFT.viewBalance(), 0);
+        assertEq(address(deployerAddress).balance, 1 ether);
     }
 
     function test_ERC2918Royalty() public {
-        // TODO: Implement the test
+        (address receiver, uint256 royaltyAmount) = stakedNFT.royaltyInfo(0, 1 ether);
+        
+        assertEq(receiver, deployerAddress);
+        assertEq(royaltyAmount, 1 ether * stakedNFT.ROYALTY_FEE() / 10000);
     }
 
     function test_MerkleTreeDiscount() public {
         // TODO: Implement the test
     }
 
-    function test_ERC20Contract() public {
-        // TODO: Implement the test
-    }
-
     function test_StakingContract() public {
-        // TODO: Implement the test
-    }
+        // Deployer mints reward tokens and sends to staking contract
+        hoax(deployerAddress, 100 ether);
+        erc20Reward.mint(address(nftRewardStaking), 100 ether);
+        assertEq(erc20Reward.balanceOf(address(nftRewardStaking)), 100 ether);
 
-    function test_OwnerWithdrawal() public {
-        // TODO: Implement the test
+        // User mints NFT
+        hoax(deployerAddress, 1 ether);
+        stakedNFT.mint{value: 1 ether}();
+        assertEq(stakedNFT.balanceOf(deployerAddress), 1);
+        assertEq(stakedNFT.ownerOf(0), deployerAddress);
+
+        // User stakes NFT
+        vm.startPrank(deployerAddress);
+        stakedNFT.approve(address(nftRewardStaking), 0);
+        stakedNFT.safeTransferFrom(deployerAddress, address(nftRewardStaking), 0);
+
+        // User waits for 1 period
+        skip(nftRewardStaking.CLAIM_PERIOD() + 3600);
+
+        // User claims rewards
+        nftRewardStaking.claimRewards(0);
+
+        // Check that the user has received the rewards
+        assertEq(erc20Reward.balanceOf(deployerAddress), nftRewardStaking.REWARDS_PER_PERIOD());
+
+        // User withdraws NFT
+        nftRewardStaking.withdrawNFT(0);
+        assertEq(stakedNFT.balanceOf(deployerAddress), 1);
     }
 }

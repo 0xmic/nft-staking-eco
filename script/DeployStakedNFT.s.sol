@@ -33,7 +33,7 @@ contract DeployStakedNFT is Script {
 
         vm.startBroadcast(deployerKey);
         StakedNFT stakedNFT = new StakedNFT(deployerAddress, merkleProof);
-        ERC20Reward erc20Reward = new ERC20Reward();
+        ERC20Reward erc20Reward = new ERC20Reward(deployerAddress);
         NFTRewardStaking nftRewardStaking = new NFTRewardStaking(address(stakedNFT), address(erc20Reward), deployerAddress);
         vm.stopBroadcast();
 

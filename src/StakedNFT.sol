@@ -1,7 +1,3 @@
-/**
- * TODO: Add versioned imports
- * TODO: Add script/tests 
- */
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
@@ -10,11 +6,6 @@ import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step
 import {ERC721Royalty} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-// import {ERC721} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/token/ERC721/ERC721.sol";
-// import {Ownable, Ownable2Step} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/access/Ownable2Step.sol";
-// import {ERC721Royalty} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/token/ERC721/extensions/ERC721Royalty.sol";
-// import {BitMaps} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/utils/structs/BitMaps.sol";
-// import {MerkleProof} from "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.0/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
  * @title StakedNFT
