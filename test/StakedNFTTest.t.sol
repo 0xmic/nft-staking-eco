@@ -62,6 +62,13 @@ contract StakedNFTTest is StdCheats, Test {
         assertEq(stakedNFT.ROYALTY_FEE(), 100);
     }
 
+    function test_setRoyaltyFail() public {
+        vm.startPrank(testUser);
+        vm.expectRevert();
+        stakedNFT.setRoyalty(address(testUser), 100);
+        vm.stopPrank();
+    }
+
     function test_withdraw() public {
         hoax(testUser, 1 ether);
         stakedNFT.mint{value: 1 ether}();
@@ -71,6 +78,13 @@ contract StakedNFTTest is StdCheats, Test {
 
         assertEq(stakedNFT.viewBalance(), 0);
         assertEq(address(deployerAddress).balance, 1 ether);
+    }
+
+    function test_withdrawFail() public {
+        vm.startPrank(testUser);
+        vm.expectRevert();
+        stakedNFT.withdraw();
+        vm.stopPrank();
     }
 
     function test_ERC2918Royalty() public {
@@ -83,6 +97,9 @@ contract StakedNFTTest is StdCheats, Test {
     function test_MerkleTreeDiscount() public {
         // TODO: Implement the test
     }
+
+    /////////////////////////////////////////////////////////
+    // NFTRewardStaking.sol 
 
     function test_StakingContract() public {
         // Deployer mints reward tokens and sends to staking contract

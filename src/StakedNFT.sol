@@ -51,27 +51,27 @@ contract StakedNFT is ERC721Royalty, Ownable2Step {
      * @param merkleProof The Merkle proof to verify the caller's eligibility for the discount.
      * @param index The index of the address in the Merkle tree.
      */
-    function claimDiscount(bytes32[] calldata merkleProof, uint256 index) external payable {
-        // Ensure the discount hasn't already been claimed
-        require(!discountBitMap.get(index), "Already claimed");
+    // function claimDiscount(bytes32[] calldata merkleProof, uint256 index) external payable {
+    //     // Ensure the discount hasn't already been claimed
+    //     require(!discountBitMap.get(index), "Already claimed");
 
-        // Verify the Merkle proof
-        bytes32 node = keccak256(abi.encodePacked(msg.sender, index));
-        bytes32 leaf = keccak256(bytes.concat(node));
-        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
+    //     // Verify the Merkle proof
+    //     bytes32 node = keccak256(abi.encodePacked(msg.sender, index));
+    //     bytes32 leaf = keccak256(bytes.concat(node));
+    //     require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid Merkle proof");
 
-        // Mark the discount as claimed in the BitMap
-        discountBitMap.setTo(index, true);
+    //     // Mark the discount as claimed in the BitMap
+    //     discountBitMap.setTo(index, true);
 
-        // Ensure the correct amount of Ether was sent
-        require(msg.value == DISCOUNT_PRICE, "Incorrect Ether value sent");
+    //     // Ensure the correct amount of Ether was sent
+    //     require(msg.value == DISCOUNT_PRICE, "Incorrect Ether value sent");
 
-        // Mint the NFT to the sender
-        _mint(msg.sender, s_tokenCounter);
+    //     // Mint the NFT to the sender
+    //     _mint(msg.sender, s_tokenCounter);
 
-        emit DiscountClaimed(msg.sender, s_tokenCounter, index);
-        s_tokenCounter++;
-    }
+    //     emit DiscountClaimed(msg.sender, s_tokenCounter, index);
+    //     s_tokenCounter++;
+    // }
 
     /**
      * @dev Mints an NFT at the normal price.
