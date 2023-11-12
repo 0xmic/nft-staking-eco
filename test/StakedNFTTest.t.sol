@@ -35,6 +35,13 @@ contract StakedNFTTest is StdCheats, Test {
         assertEq(erc20Reward.name(), "RewardToken");
     }
 
+    function test_NonOwnerCantMint() public {
+        vm.startPrank(testUser);
+        vm.expectRevert();
+        erc20Reward.mint(testUser, 1 ether);
+        vm.stopPrank();
+    }
+
     /////////////////////////////////////////////////////////
     // StakedNFT.sol 
 
